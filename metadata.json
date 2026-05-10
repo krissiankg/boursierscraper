@@ -1,6 +1,6 @@
 {
-  "name": "Boursier Data Scraper 1.0",
-  "description": "An AI-powered application to extract historical stock data for a given list of ISIN codes. It uses Gemini to fetch company names, 1-year high/low prices, and dates, then displays the data in a table and allows exporting to CSV.",
+  "name": "Boursier Data Scraper v3.3",
+  "description": "An ultra-robust application to extract historical stock data (1Y High/Low) for ISIN codes. Uses a dual-source engine with Yahoo Finance API and Puppeteer fallback.",
   "requestFramePermissions": [],
   "majorCapabilities": []
-}
+}
