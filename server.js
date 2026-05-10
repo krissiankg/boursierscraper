@@ -9,7 +9,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3005;
 const distPath = path.join(__dirname, 'dist');
 
 app.use(cors());
@@ -149,8 +149,12 @@ async function scrapeStockData(isin) {
   // --- SOURCE 2 : PUPPETEER FALLBACK (Si l'API Yahoo ne répond pas) ---
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080'],
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox', 
+      '--disable-dev-shm-usage',
+      '--window-size=1920,1080'
+    ]
   });
 
   try {
@@ -165,8 +169,7 @@ async function scrapeStockData(isin) {
       
       const gData = await page.evaluate(() => {
         const text = document.body.innerText;
-        const match = text.match(/52\s?semaines[\s\S]{0,100}?(\d+[\s,.]\d*)\s+-\s+(\d+[\s,.]\d*)/i) ||
-                      text.match(/52-week range[\s\S]{0,100}?(\d+[\s,.]\d*)\s+-\s+(\d+[\s,.]\d*)/i);
+        const match = text.match(/(?:52\s?semaines|52-week range|52\s?weeks)[\s\S]{0,100}?(\d+[\s,.]\d*)\s+-\s+(\d+[\s,.]\d*)/i);
         const name = document.querySelector('div[role="main"] h1')?.innerText || document.querySelector('h1')?.innerText || 'N/A';
         return { low: match ? match[1] : 'N/A', high: match ? match[2] : 'N/A', name };
       });

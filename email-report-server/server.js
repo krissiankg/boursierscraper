@@ -58,8 +58,10 @@ async function scrapeStockData(isin) {
                     let maxHighTs = null; let minLowTs = null;
 
                     for (let i = 0; i < timestamps.length; i++) {
-                        if (highs[i] > maxHigh) { maxHigh = highs[i]; maxHighTs = timestamps[i]; }
-                        if (lows[i] < minLow) { minLow = lows[i]; minLowTs = timestamps[i]; }
+                        const h = highs[i];
+                        const l = lows[i];
+                        if (h !== null && h > maxHigh) { maxHigh = h; maxHighTs = timestamps[i]; }
+                        if (l !== null && l < minLow) { minLow = l; minLowTs = timestamps[i]; }
                     }
                     if (maxHigh !== -Infinity) {
                         result.high1y = cleanNum(maxHigh);
@@ -76,8 +78,7 @@ async function scrapeStockData(isin) {
     // PUPPETEER FALLBACK
     const browser = await puppeteer.launch({ 
         headless: "new", 
-        args: ['--no-sandbox'],
-        executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     try {
         const page = await browser.newPage();
@@ -85,7 +86,7 @@ async function scrapeStockData(isin) {
         await new Promise(r => setTimeout(r, 2000));
         const gData = await page.evaluate(() => {
             const text = document.body.innerText;
-            const match = text.match(/52\s?semaines[\s\S]{0,100}?(\d+[\s,.]\d*)\s+-\s+(\d+[\s,.]\d*)/i);
+            const match = text.match(/(?:52\s?semaines|52-week range|52\s?weeks)[\s\S]{0,100}?(\d+[\s,.]\d*)\s+-\s+(\d+[\s,.]\d*)/i);
             const name = document.querySelector('h1')?.innerText || 'N/A';
             return { low: match ? match[1] : 'N/A', high: match ? match[2] : 'N/A', name };
         });
@@ -101,8 +102,9 @@ async function scrapeStockData(isin) {
 }
 
 // --- LOGIQUE D'ENVOI D'EMAIL ---
-async function sendReport() {
-    console.log(`[REPORT] Démarrage du scan automatique...`);
+async function sendReport(overrideEmail = null) {
+    const recipient = overrideEmail || process.env.RECIPIENT_EMAIL;
+    console.log(`[REPORT] Démarrage du scan automatique pour ${recipient}...`);
     
     if (!fs.existsSync(isinsPath)) {
         console.error("Fichier isins.json introuvable !");
@@ -147,7 +149,7 @@ async function sendReport() {
     
     const mailOptions = {
         from: process.env.SMTP_FROM,
-        to: process.env.RECIPIENT_EMAIL,
+        to: recipient,
         subject: `📊 Rapport Boursier Quotidien - ${today}`,
         text: `Bonjour,\n\nVeuillez trouver ci-joint le rapport d'extraction des données boursières pour la journée du ${today}.\n\nNombre d'ISIN traités : ${results.length}\n\nCordialement,\nBoursier Scraper Bot`,
         attachments: [
@@ -160,7 +162,7 @@ async function sendReport() {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`[SUCCESS] Rapport envoyé à ${process.env.RECIPIENT_EMAIL}`);
+        console.log(`[SUCCESS] Rapport envoyé à ${recipient}`);
     } catch (error) {
         console.error(`[ERROR] Échec de l'envoi :`, error);
     }
@@ -178,8 +180,9 @@ cron.schedule('0 18 * * *', () => {
 
 // Endpoint pour déclenchement manuel
 app.get('/trigger-report', async (req, res) => {
-    sendReport();
-    res.send("Scan et envoi de rapport lancés en arrière-plan.");
+    const targetEmail = req.query.email || null;
+    sendReport(targetEmail);
+    res.send(`Scan et envoi de rapport lancés en arrière-plan vers ${targetEmail || "l'email par défaut"}.`);
 });
 
 app.listen(port, () => {

@@ -49,14 +49,14 @@ module.exports = async function (req, res) {
         Statut: data.high1y !== 'N/A' ? 'Succès' : 'Échec'
       });
       // Petite pause pour ne pas spammer l'API Yahoo
-      await new Promise(r => setTimeout(r, 500)); 
+      await new Promise(r => setTimeout(r, 500));
     }
 
     // 3. Créer le fichier Excel en mémoire
     const worksheet = xlsx.utils.json_to_sheet(results);
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, 'Resultats');
-    
+
     // Générer le buffer binaire du fichier Excel
     const excelBuffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
@@ -71,7 +71,7 @@ module.exports = async function (req, res) {
     });
 
     const dateStr = new Date().toLocaleDateString('fr-FR');
-    
+
     const mailOptions = {
       from: `"Boursier Scraper" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_TO || process.env.EMAIL_USER,
@@ -86,11 +86,11 @@ module.exports = async function (req, res) {
     };
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        console.log("Envoi de l'email en cours...");
-        await transporter.sendMail(mailOptions);
-        console.log("Email envoyé avec succès !");
+      console.log("Envoi de l'email en cours...");
+      await transporter.sendMail(mailOptions);
+      console.log("Email envoyé avec succès !");
     } else {
-        console.log("Attention: EMAIL_USER ou EMAIL_PASS manquant. L'email n'a pas pu être envoyé.");
+      console.log("Attention: EMAIL_USER ou EMAIL_PASS manquant. L'email n'a pas pu être envoyé.");
     }
 
     res.status(200).json({ success: true, message: 'Extraction et email terminés.' });

@@ -8,7 +8,7 @@ import { StockData } from '../types';
 export async function fetchStockDataForIsin(isin: string): Promise<StockData> {
   console.log(`[SCRAPER] Recherche de données pour ${isin}...`);
   // Use the local server API instead of Gemini
-  const response = await fetch(`http://localhost:3000/api/scrape/${isin}`);
+  const response = await fetch(`/api/scrape/${isin}`);
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
