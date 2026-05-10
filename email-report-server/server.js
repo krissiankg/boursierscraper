@@ -1,5 +1,5 @@
 // email-report-server/server.js
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
