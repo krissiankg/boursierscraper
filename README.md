@@ -45,8 +45,25 @@ npm run dev
 
 - `App.tsx` : Interface utilisateur principale et logique de gestion de file d'attente.
 - `server.js` : Serveur Node.js gérant l'API de scraping et servant les fichiers statiques.
+- `email-report-server/` : Module d'automatisation (Cron) qui envoie les rapports par email.
 - `services/scrapingService.ts` : Pont entre le frontend et l'API locale.
 - `lancer_application.bat` : Script de lancement rapide pour Windows.
+
+## 📧 Automatisation des Rapports (Email)
+
+Le projet inclut un serveur secondaire situé dans `email-report-server/` dédié à l'envoi automatique de rapports Excel par e-mail.
+
+### Configuration
+1. Allez dans le dossier `email-report-server/`.
+2. Vérifiez le fichier `.env` et assurez-vous que `RECIPIENT_EMAIL` est correct.
+3. Installez les dépendances : `npm install`.
+
+### Lancement
+Pour activer le scan quotidien de 18h00, lancez :
+```bash
+npm start
+```
+Le serveur restera en attente et déclenchera l'extraction et l'envoi automatiquement chaque jour.
 
 ---
 
