@@ -1,7 +1,3 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # Boursier Data Scraper v3.3
 
 **Boursier Data Scraper** est une solution ultra-robuste pour l'extraction automatisée de données boursières (Plus Haut / Plus Bas sur 1 an avec dates exactes). Conçue pour la précision et la rapidité, l'application utilise une architecture hybride combinant des appels API directs et un moteur de scraping furtif.
