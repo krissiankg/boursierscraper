@@ -134,11 +134,9 @@ async function sendReport(overrideEmail = null) {
     XLSX.utils.book_append_sheet(wb, ws, "Rapport");
     const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
-    // Configuration SMTP
+    // Configuration SMTP optimisée pour Gmail
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT),
-        secure: process.env.SMTP_SECURE === 'true',
+        service: 'gmail',
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
