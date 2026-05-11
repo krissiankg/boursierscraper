@@ -25,7 +25,7 @@ async function handleConsent(page) {
       '#cmp-welcome-add-button',
       '.qc-cmp2-summary-buttons button[mode="primary"]'
     ];
-    
+
     for (const selector of selectors) {
       const btn = await page.$(selector);
       if (btn) {
@@ -57,7 +57,7 @@ async function handleConsent(page) {
         for (const iframe of iframes) {
           try {
             if (findAndClick(iframe.contentDocument)) break;
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     });
@@ -79,9 +79,9 @@ async function scrapeStockData(isin) {
   };
 
   const formatDate = (ts) => {
-      if (!ts) return 'N/A';
-      const d = new Date(ts * 1000);
-      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    if (!ts) return 'N/A';
+    const d = new Date(ts * 1000);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
   };
 
   try {
@@ -96,62 +96,62 @@ async function scrapeStockData(isin) {
     const name = searchData.quotes?.[0]?.longname || searchData.quotes?.[0]?.shortname || 'N/A';
 
     if (symbol) {
-        result.companyName = name;
-        console.log(`[YAHOO API] Extraction historique pour ${symbol}...`);
-        
-        const chartRes = await fetch(`https://query2.finance.yahoo.com/v8/finance/chart/${symbol}?range=1y&interval=1d`, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-        });
-        
-        if (chartRes.ok) {
-            const chartData = await chartRes.json();
-            const chartResult = chartData.chart?.result?.[0];
-            
-            if (chartResult && chartResult.timestamp && chartResult.indicators?.quote?.[0]) {
-                const timestamps = chartResult.timestamp;
-                const highs = chartResult.indicators.quote[0].high;
-                const lows = chartResult.indicators.quote[0].low;
+      result.companyName = name;
+      console.log(`[YAHOO API] Extraction historique pour ${symbol}...`);
 
-                let maxHigh = -Infinity;
-                let minLow = Infinity;
-                let maxHighTimestamp = null;
-                let minLowTimestamp = null;
+      const chartRes = await fetch(`https://query2.finance.yahoo.com/v8/finance/chart/${symbol}?range=1y&interval=1d`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
 
-                for (let i = 0; i < timestamps.length; i++) {
-                    const high = highs[i];
-                    const low = lows[i];
+      if (chartRes.ok) {
+        const chartData = await chartRes.json();
+        const chartResult = chartData.chart?.result?.[0];
 
-                    if (high !== null && high > maxHigh) {
-                        maxHigh = high;
-                        maxHighTimestamp = timestamps[i];
-                    }
-                    if (low !== null && low < minLow) {
-                        minLow = low;
-                        minLowTimestamp = timestamps[i];
-                    }
-                }
+        if (chartResult && chartResult.timestamp && chartResult.indicators?.quote?.[0]) {
+          const timestamps = chartResult.timestamp;
+          const highs = chartResult.indicators.quote[0].high;
+          const lows = chartResult.indicators.quote[0].low;
 
-                if (maxHigh !== -Infinity && minLow !== Infinity) {
-                    result.high1y = cleanNum(maxHigh);
-                    result.high1yDate = formatDate(maxHighTimestamp);
-                    result.low1y = cleanNum(minLow);
-                    result.low1yDate = formatDate(minLowTimestamp);
-                    console.log(`[OK YAHOO API] ${result.companyName} | H: ${result.high1y} (${result.high1yDate}) | B: ${result.low1y} (${result.low1yDate})`);
-                    return result;
-                }
+          let maxHigh = -Infinity;
+          let minLow = Infinity;
+          let maxHighTimestamp = null;
+          let minLowTimestamp = null;
+
+          for (let i = 0; i < timestamps.length; i++) {
+            const high = highs[i];
+            const low = lows[i];
+
+            if (high !== null && high > maxHigh) {
+              maxHigh = high;
+              maxHighTimestamp = timestamps[i];
             }
+            if (low !== null && low < minLow) {
+              minLow = low;
+              minLowTimestamp = timestamps[i];
+            }
+          }
+
+          if (maxHigh !== -Infinity && minLow !== Infinity) {
+            result.high1y = cleanNum(maxHigh);
+            result.high1yDate = formatDate(maxHighTimestamp);
+            result.low1y = cleanNum(minLow);
+            result.low1yDate = formatDate(minLowTimestamp);
+            console.log(`[OK YAHOO API] ${result.companyName} | H: ${result.high1y} (${result.high1yDate}) | B: ${result.low1y} (${result.low1yDate})`);
+            return result;
+          }
         }
+      }
     }
   } catch (e) {
-      console.log(`[SKIP YAHOO API] ${e.message}`);
+    console.log(`[SKIP YAHOO API] ${e.message}`);
   }
 
   // --- SOURCE 2 : PUPPETEER FALLBACK (Si l'API Yahoo ne répond pas) ---
   const browser = await puppeteer.launch({
     headless: "new",
     args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox', 
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--window-size=1920,1080'
     ]
@@ -166,7 +166,7 @@ async function scrapeStockData(isin) {
       console.log(`[GOOGLE] Recherche ${isin}...`);
       await page.goto(`https://www.google.com/finance/quote/${isin}:EPA`, { waitUntil: 'domcontentloaded', timeout: 15000 });
       await new Promise(r => setTimeout(r, 3000));
-      
+
       const gData = await page.evaluate(() => {
         const text = document.body.innerText;
         const match = text.match(/(?:52\s?semaines|52-week range|52\s?weeks)[\s\S]{0,100}?(\d+[\s,.]\d*)\s+-\s+(\d+[\s,.]\d*)/i);
